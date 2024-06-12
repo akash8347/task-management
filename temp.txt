@@ -1,0 +1,98 @@
+To protect routes in a Next.js App Router environment, whether for server or client components, you can utilize the auth() function provided by Auth.js. Below, I'll guide you through the necessary steps for both server and client components.
+
+Protecting Server Components
+Install Auth.js: Ensure you have Auth.js installed.
+bash
+npm install next-auth
+Create Auth Configuration: Create an authentication configuration file (e.g., auth.ts).
+typescript
+import NextAuth from "next-auth"
+import GitHub from "next-auth/providers/github"
+
+export const { handlers, auth } = NextAuth({
+    providers: [GitHub],
+})
+Create API Route for Authentication: Set up the dynamic route handler in the app/api/auth/[...nextauth]/route.ts file.
+typescript
+import { handlers } from "@/auth"
+export const { GET, POST } = handlers
+export const runtime = "edge" // optional
+Protect Server Components: Use the auth() function in your server components to check for an active session.
+typescript
+import { auth } from "@/auth"
+
+export default async function Page() {
+    const session = await auth()
+    if (!session) return <div>Not authenticated</div>
+    return (
+        <div>
+            <pre>{JSON.stringify(session, null, 2)}</pre>
+        </div>
+    )
+}
+This will check if a session exists and render content accordingly1.
+Protecting Client Components
+Use SessionProvider: Wrap your client components with SessionProvider to handle and check for authentication.
+typescript
+import { SessionProvider } from "next-auth/react"
+import type { AppProps } from "next/app"
+
+export default function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
+    return (
+        <SessionProvider session={session}>
+            <Component {...pageProps} />
+        </SessionProvider>
+    )
+}
+Use useSession Hook: Use the useSession hook to access session information within your client component.
+typescript
+import { useSession } from "next-auth/react"
+
+export default function Page() {
+    const { data: session } = useSession()
+
+    if (!session) return <div>Not authenticated</div>
+    return (
+        <div>
+            <pre>{JSON.stringify(session, null, 2)}</pre>
+        </div>
+    )
+}
+Middleware Protection (Optional)
+You can also protect routes using Next.js Middleware to ensure certain paths are restricted based on the session.
+
+Create Middleware: Create a middleware.ts file at the root of your pages directory.
+typescript
+import { withAuth } from "next-auth/middleware"
+
+export default withAuth({
+    pages: {
+        signIn: '/auth/signin',  // Redirect to sign-in page if not authenticated
+    },
+})
+
+export const config = { matcher: ["/dashboard/:path*", "/protected/:path*"] }
+This middleware will automatically redirect users to the sign-in page if they attempt to access protected routes and are not authenticated23.
+
+Summary
+Server Components: Use auth() function.
+Client Components: Wrap with SessionProvider and use useSession hook.
+Middleware: Use withAuth to protect routes.
+
+
+
+---------------------
+
+
+just some code
+
+
+ callbacks: {
+    async signIn({ account, profile }) {
+      if (account.provider === "google") {
+        console.log(profile.sub); // log the unique identifier
+        return true;
+      }
+      return false;
+    },
+  },
