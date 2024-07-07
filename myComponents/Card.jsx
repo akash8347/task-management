@@ -27,7 +27,7 @@ export default function Card({ title, create, id, onbtnclick ,updateTask}) {
               mb-0 py-1 w-full  mr-5  rounded-lg"
               placeholder="edit" value={newtitle} onChange={(e)=>setTitle(e.target.value)}
             />
-            <p className="text-xs mb-2 text-red-500">click below checkmark or enter to save</p>
+            <p className="text-xs mb-2 text-red-500">click checkmark or enter to save</p>
             <button  type="submit"  ><CiBookmarkCheck className=" text-blue-500 active:scale-150" size={25}/></button>
             </form>
             </>
